@@ -38,7 +38,7 @@ graph LR
         G --> BI["BI Dashboards<br>(Reporting and Insights)"]
         BI --> AL(("Alerts and Monitoring"))
         
-        GH -.->|"CI/CD Sync"| W["Databricks Workflows / Jobs"]:::databricks
+        GH -.->|"Databricks Repos Sync"| W["Databricks Workflows / Jobs"]:::databricks
         W -.->|"Executes Sequence"| B
         W -.->|"Chains to"| S
         W -.->|"Chains to"| G
