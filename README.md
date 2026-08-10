@@ -7,58 +7,87 @@
   <img src="https://img.shields.io/badge/Azure%20SQL-00BCF2?style=for-the-badge&logo=Microsoft%20Azure&logoColor=white" alt="Azure SQL">
 </p>
 
-## 📖 About the Project
-
-The **Novacart Data Pipeline** is an enterprise-grade data engineering solution built to process, clean, and analyze high-velocity e-commerce data. It ingests transactional data directly from an **Azure SQL Database** using **Databricks Lakehouse Federation**, allowing for seamless and secure data access without moving the underlying data until necessary. 
-
-The core processing engine is built on **Azure Databricks** leveraging **PySpark** and **Delta Lake**. The pipeline rigorously follows the **Medallion Architecture**, progressing data through Bronze, Silver, and Gold layers to ultimately feed **BI Dashboards** and trigger automated **Alerts** based on business metrics. The entire project is integrated with **GitHub** via Databricks Repos for CI/CD and version control, with metadata and governance managed by **Unity Catalog**.
-
-This project showcases production-ready data engineering concepts including:
-- **Lakehouse Federation**: Querying external SQL databases directly from Databricks.
-- **Medallion Architecture**: Structuring data pipelines into raw, cleansed, and curated layers.
-- **Incremental Data Loading**: Efficiently loading only new and changed records to save compute costs.
-- **Slowly Changing Dimensions (SCD Type 2)**: Historical tracking of business entity changes over time.
-- **Data Quality Control**: Built-in pipelines to quarantine bad records before they pollute downstream analytics.
-- **Workflow Automation & Alerting**: Databricks Jobs scheduling notebooks, refreshing dashboards, and triggering notifications.
-
 ## 🏗️ Architecture
 
 <p align="center">
   <img src="./assets/architecture.png" alt="Architecture Diagram">
 </p>
 
-## ⚙️ Data Pipeline Stages
+---
 
-### 🥉 Bronze Layer
-- **Incremental Data Loading**: Acts as the raw landing zone. Data is pulled via Lakehouse Federation from Azure SQL into Delta Lake. Metadata is attached (e.g., ingestion timestamps and run IDs) to track incremental batches.
+## 🛒 Case Study
+We are working with an e-commerce system that generates data across:
+- **Products**
+- **Orders**
+- **Payments**
 
-### 🥈 Silver Layer
-- **Data Cleaning & Transformations**: Cleanses and standardizes the raw data. 
-  - Standardizes timestamps, casts strings to numeric types, and formats text.
-  - Implements data quality rules, quarantining invalid records (like negative payment amounts) for manual review so the main pipeline never breaks.
+This data is continuously evolving — new records are inserted and existing records are updated.
 
-### 🥇 Gold Layer
-- **Business Aggregations & History Tracking**: The curated layer for analytics.
-  - Denormalizes data into a cohesive analytical model.
-  - Implements **SCD Type 2** to track historical changes (e.g., product price changes or order status updates).
-  - Aggregates metrics to track Gross Merchandise Value (GMV), payment completion ratios, and payment failure rates across product categories.
+**The goal is to design a pipeline that:**
+- Processes only new or updated data (processing only what changed, avoiding reprocessing, and keeping the system reliable and scalable)
+- Avoids duplicate ingestion
+- Maintains state across runs
 
-## 📊 Orchestration & Visualization
-- **Jobs & Workflows**: Databricks Jobs automate the sequential execution of the Bronze, Silver, and Gold notebooks.
-- **BI Dashboards**: The final Gold tables power business intelligence dashboards for stakeholders.
-- **Alerts**: Automated alerts are configured to trigger notifications (e.g., via email or Slack) when specific data thresholds are met or if pipeline failures occur.
+## 🔌 Ingestion (Lakehouse Federation)
+Data is sourced from Azure SQL Database using **Databricks Lakehouse Federation** (Unity Catalog connection).
+- Direct access to source tables via Unity Catalog.
+- No traditional ETL connectors required.
+- Data is incrementally loaded into Delta tables.
 
-## 🛠️ Technology Stack
+## 🧱 Data Model
+The pipeline is built on a relational model where:
+- Products, orders, and payments are interconnected.
+- Changes in one entity can impact downstream outputs.
+- Multiple tables are combined to produce analytics-ready data.
 
-- **Data Sources**: Azure SQL Database
-- **Compute & Orchestration**: Azure Databricks, Databricks Workflows, Jobs
-- **Governance & Storage**: Unity Catalog, Delta Lake, Parquet
-- **Languages**: Python (PySpark), SQL
-- **CI/CD & Version Control**: GitHub, Databricks Repos
-- **Consumption**: Databricks SQL Dashboards, Alerts
+## 🔄 Pipeline Design (Medallion Architecture)
 
-## 📬 Contact / Let's Connect
+### 🥉 Bronze — Raw Layer
+- Incremental ingestion using watermark logic.
+- Control table to track the last processed state.
+- Raw Delta tables with ingestion metadata.
 
-If you'd like to discuss this project, data engineering, or potential opportunities, feel free to reach out!
+### 🥈 Silver — Clean Layer
+- Data cleaning, standardization, and deduplication.
+- Data quality checks and quarantine handling.
+- Incremental upserts using Delta `MERGE`.
 
-- **GitHub**: [@ahmedelsheikh109](https://github.com/ahmedelsheikh109)
+### 🥇 Gold — Business Layer
+- Combines data across entities.
+- Produces an analytics-ready dataset.
+- Maintains historical changes using Slowly Changing Dimensions (**SCD Type 2**).
+
+## 🧑‍💻 Code Management (GitHub + Databricks Repos)
+Code is version-controlled using **GitHub**, integrated with Databricks Repos. This setup enables:
+- Version control
+- Collaboration
+- Clean separation of environments
+
+*All pipeline notebooks are managed through this setup.*
+
+## ⚙️ Jobs & Workflows (Orchestration)
+The pipeline is orchestrated using **Databricks Jobs / Workflows**, where:
+- Notebook files (from Databricks Repos) are executed in sequence.
+- Bronze → Silver → Gold layers are chained together.
+- BI dashboards are refreshed after pipeline completion.
+- Alerts are triggered as part of the workflow.
+
+## 📊 BI Dashboards
+The Gold layer powers BI dashboards, enabling:
+- Reporting and visualization.
+- Consumption of curated business data.
+- Insights for downstream users.
+
+## 🔔 Alerts & Monitoring
+Alerts are configured to:
+- Notify on pipeline failures or issues.
+- Trigger based on workflow outcomes.
+- Ensure reliability and observability.
+
+## 🔑 Key Concepts Covered
+- Incremental loading (no full reloads)
+- Watermark logic (timestamp + primary key)
+- Delta Lake `MERGE` (upsert)
+- Control tables for tracking state
+- Idempotent pipeline design
+- SCD Type 2
