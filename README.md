@@ -36,9 +36,9 @@ graph TD
         LF([Databricks Lakehouse Federation])
         
         subgraph Databricks_Repos [Databricks Repos via GitHub]
-            subgraph Unity_Catalog [Unity Catalog & Delta Lake]
+            subgraph Unity_Catalog [Unity Catalog and Delta Lake]
                 B["Bronze Layer<br>Incremental Data Loading"]
-                S["Silver Layer<br>Data Cleaning & Transformations"]
+                S["Silver Layer<br>Data Cleaning and Transformations"]
                 G["Gold Layer<br>Data Joining, Data Enrichment, History Tracking - SCD2, Business Aggregations"]
             end
         end
@@ -47,7 +47,7 @@ graph TD
             BI[BI Dashboards]
         end
 
-        subgraph Jobs_Workflows [Jobs | Workflows]
+        subgraph Jobs_Workflows [Jobs and Workflows]
             W_N[Notebook Files]
             W_D[BI Dashboard Refresh]
             W_A[Alert Execution]
