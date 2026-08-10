@@ -25,51 +25,30 @@ This project showcases production-ready data engineering concepts including:
 
 ```mermaid
 graph LR
-    subgraph External_Systems [External Systems]
-        SQL[(Azure SQL Database)]
-        GH[GitHub]
-    end
+    %% Define styles for obvious colors
+    classDef bronze fill:#cd7f32,stroke:#333,stroke-width:2px,color:#fff;
+    classDef silver fill:#c0c0c0,stroke:#333,stroke-width:2px,color:#000;
+    classDef gold fill:#ffd700,stroke:#333,stroke-width:2px,color:#000;
+    classDef sql fill:#00bfff,stroke:#333,stroke-width:2px,color:#fff;
+    classDef databricks fill:#ff3621,stroke:#333,stroke-width:2px,color:#fff;
 
-    SQL -->|"1. Customer Orders<br>2. Product Details<br>3. Payment Transactions"| LF
+    SQL[(Azure SQL Database)]:::sql -->|Lakehouse Federation| B
     
-    subgraph Azure_Databricks [Azure Databricks Environment]
-        LF([Databricks Lakehouse Federation])
+    subgraph Medallion Architecture [Databricks Unity Catalog and Delta Lake]
+        direction LR
+        B[(Bronze Layer)]:::bronze -->|Cleanse and Standardize| S[(Silver Layer)]:::silver
+        S -->|Aggregate and SCD Type 2| G[(Gold Layer)]:::gold
+    end
+    
+    subgraph Orchestration and Consumption
+        G --> BI[BI Dashboards]
+        BI --> AL((Trigger Alerts))
         
-        subgraph Databricks_Repos [Databricks Repos via GitHub]
-            subgraph Unity_Catalog [Unity Catalog and Delta Lake]
-                B["Bronze Layer<br>Incremental Data Loading"]
-                S["Silver Layer<br>Data Cleaning and Transformations"]
-                G["Gold Layer<br>Data Joining, Data Enrichment, History Tracking - SCD2, Business Aggregations"]
-            end
-        end
-
-        subgraph Consumption [Consumption]
-            BI[BI Dashboards]
-        end
-
-        subgraph Jobs_Workflows [Jobs and Workflows]
-            W_N[Notebook Files]
-            W_D[BI Dashboard Refresh]
-            W_A[Alert Execution]
-        end
-
-        Alert((Alert to Trigger Notification))
+        GH[GitHub Repos] -.->|CI/CD Sync| W[Databricks Workflows / Jobs]:::databricks
+        W -.->|Automates| B
+        W -.->|Automates| S
+        W -.->|Automates| G
     end
-
-    LF --> B
-    B --> S
-    S --> G
-    
-    GH -.->|"CI/CD Version Control"| Databricks_Repos
-
-    G --> BI
-    G -.->|"Orchestrated by"| W_N
-    
-    W_N --> W_D
-    W_D --> W_A
-    
-    BI --> Alert
-    W_A --> Alert
 ```
 
 ## ⚙️ Data Pipeline Stages
