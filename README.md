@@ -22,13 +22,13 @@ graph LR
 
     SQL[(Azure SQL Database)]:::sql -->|Lakehouse Federation| B
     
-    subgraph Medallion Architecture [Databricks Unity Catalog and Delta Lake]
+    subgraph Medallion_Architecture [Databricks Unity Catalog and Delta Lake]
         direction LR
         B[(Bronze Layer)]:::bronze -->|Cleanse and Standardize| S[(Silver Layer)]:::silver
         S -->|Aggregate and SCD Type 2| G[(Gold Layer)]:::gold
     end
     
-    subgraph Orchestration and Consumption
+    subgraph Orchestration_and_Consumption [Orchestration and Consumption]
         G --> BI[BI Dashboards]
         BI --> AL((Trigger Alerts))
         
@@ -98,11 +98,19 @@ The pipeline is orchestrated using **Databricks Jobs / Workflows**, where:
 - BI dashboards are refreshed after pipeline completion.
 - Alerts are triggered as part of the workflow.
 
-## 📊 BI Dashboards
-The Gold layer powers BI dashboards, enabling:
-- Reporting and visualization.
-- Consumption of curated business data.
-- Insights for downstream users.
+## 📊 BI Dashboard (Power BI)
+The Gold layer powers an enterprise-grade, single-page **Executive Performance Dashboard** located in [`power_bi/`](./power_bi/):
+- **Unified 1280x720 Executive Canvas**: Eliminates multi-tab switching by unifying topline KPIs, daily trends, category margins, customer segmentation, fulfillment funnels, and payment gateway health on a single high-density executive command surface.
+- **Top 5 KPI Command Bar**: Real-time tracking of Gross Merchandise Value (GMV), Net Realized GMV, Total Collected Cash, Total Orders, and Average Order Value (AOV).
+- **Interactive Global Filtering**: Category slicer enabling instant cross-filtering across all financial, customer, and fulfillment visuals.
+- **Balanced 3x2 Analytics Grid**:
+  - *Daily GMV vs. Collected Cash Combo*: Direct line-and-column trend tracking revenue demand vs. bank-settled cash liquidity.
+  - *Category GMV Share*: Bar breakdown identifying core sales drivers across product lines.
+  - *Customer RFM Segmentation*: Donut chart visualizing revenue contribution from High-Value/VIP vs. Standard tiers.
+  - *Price Tier Revenue*: Granular analysis of catalog pricing power (Budget, Mid, Premium, Luxury).
+  - *Order Fulfillment Pipeline*: Funnel visualization of orders progressing through Placed, Shipped, Delivered, and Cancelled.
+  - *Payment Gateway Outcomes & Settlement*: Column chart tracking payment authorization states, pending balances, and settlement risks.
+- **Enterprise Dark Theme**: Modern Slate 900 (`#0F172A`) canvas, Slate 800 (`#1E293B`) container cards, with Electric Blue (`#3B82F6`), Emerald Green (`#10B981`), Amber (`#F59E0B`), Purple (`#8B5CF6`), and Rose (`#EF4444`) semantic accents.
 
 ## 🔔 Alerts & Monitoring
 Alerts are configured to:
