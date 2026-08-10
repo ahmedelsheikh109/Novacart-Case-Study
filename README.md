@@ -7,6 +7,14 @@
   <img src="https://img.shields.io/badge/Azure%20SQL-00BCF2?style=for-the-badge&logo=Microsoft%20Azure&logoColor=white" alt="Azure SQL">
 </p>
 
+## 📖 About the Project
+
+The **Novacart Data Pipeline** is an enterprise-grade data engineering solution designed to process, clean, and analyze high-velocity e-commerce data. 
+
+Built on **Azure Databricks**, this project utilizes **PySpark** and **Delta Lake** to ingest raw data (Orders, Products, Payments) from Azure SQL Database and transform it into high-quality, actionable insights using the **Medallion Architecture**. 
+
+To ensure production-level code management and collaboration, **Azure Databricks is seamlessly integrated with GitHub via Databricks Repos**, providing robust version control, clean separation of environments, and automated notebook synchronization.
+
 ## 🏗️ Architecture
 
 ```mermaid
