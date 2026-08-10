@@ -18,32 +18,22 @@ graph LR
     classDef sql fill:#00bfff,stroke:#333,stroke-width:2px,color:#fff;
     classDef databricks fill:#ff3621,stroke:#333,stroke-width:2px,color:#fff;
 
-    subgraph External_Systems [External Sources]
-        SQL[("Azure SQL Database<br>(Products, Orders, Payments)")]:::sql
-        GH["GitHub<br>(Version Control)"]:::databricks
-    end
-
-    SQL -->|"Lakehouse Federation<br>(Direct Unity Catalog Conn.)"| B
+    SQL[(Azure SQL Database)]:::sql -->|Lakehouse Federation| B
     
     subgraph Medallion Architecture [Databricks Unity Catalog and Delta Lake]
         direction LR
-        B[("Bronze Layer<br>Incremental Ingestion<br>Watermarks and Control Tables")]:::bronze
-        
-        B -->|"Clean, Standardize<br>and Quarantine"| S[("Silver Layer<br>Delta MERGE Upserts")]:::silver
-        
-        S -->|"Combine Entities"| G[("Gold Layer<br>Analytics-Ready<br>History Tracking (SCD2)")]:::gold
+        B[(Bronze Layer)]:::bronze -->|Cleanse and Standardize| S[(Silver Layer)]:::silver
+        S -->|Aggregate and SCD Type 2| G[(Gold Layer)]:::gold
     end
     
     subgraph Orchestration and Consumption
-        G --> BI["BI Dashboards<br>(Reporting and Insights)"]
-        BI --> AL(("Alerts and Monitoring"))
+        G --> BI[BI Dashboards]
+        BI --> AL((Trigger Alerts))
         
-        GH -.->|"Databricks Repos Sync"| W["Databricks Workflows / Jobs"]:::databricks
-        W -.->|"Executes Sequence"| B
-        W -.->|"Chains to"| S
-        W -.->|"Chains to"| G
-        W -.->|"Refreshes"| BI
-        W -.->|"Triggers"| AL
+        GH[GitHub] -.->|Databricks Repos Sync| W[Databricks Workflows / Jobs]:::databricks
+        W -.->|Automates| B
+        W -.->|Automates| S
+        W -.->|Automates| G
     end
 ```
 
