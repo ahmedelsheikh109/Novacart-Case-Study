@@ -25,29 +25,29 @@ This project showcases production-ready data engineering concepts including:
 
 ```mermaid
 graph TD
-    subgraph External Systems
+    subgraph External_Systems [External Systems]
         SQL[(Azure SQL Database)]
         GH[GitHub]
     end
 
-    SQL -- "1. Customer Orders\n2. Product Details\n3. Payment Transactions" --> LF
+    SQL -- "1. Customer Orders<br>2. Product Details<br>3. Payment Transactions" --> LF
     
-    subgraph Azure Databricks Environment
+    subgraph Azure_Databricks [Azure Databricks Environment]
         LF([Databricks Lakehouse Federation])
         
-        subgraph Databricks Repos [Databricks Repos via GitHub]
-            subgraph Unity Catalog & Delta Lake
+        subgraph Databricks_Repos [Databricks Repos via GitHub]
+            subgraph Unity_Catalog [Unity Catalog & Delta Lake]
                 B[Bronze Layer<br><i>Incremental Data Loading</i>]
                 S[Silver Layer<br><i>Data Cleaning & Transformations</i>]
                 G[Gold Layer<br><i>Data Joining, Data Enrichment, History Tracking - SCD2, Business Aggregations</i>]
             end
         end
 
-        subgraph Consumption
+        subgraph Consumption [Consumption]
             BI[BI Dashboards]
         end
 
-        subgraph Jobs | Workflows
+        subgraph Jobs_Workflows [Jobs | Workflows]
             W_N[Notebook Files]
             W_D[BI Dashboard Refresh]
             W_A[Alert Execution]
@@ -60,7 +60,7 @@ graph TD
     B --> S
     S --> G
     
-    GH <-. CI/CD Version Control .-> Databricks Repos
+    GH -. CI/CD Version Control .-> Databricks_Repos
 
     G --> BI
     G -. Orchestrated by .-> W_N
