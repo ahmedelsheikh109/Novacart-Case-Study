@@ -4,101 +4,103 @@
   <img src="https://img.shields.io/badge/Azure%20Databricks-F3702A?style=for-the-badge&logo=Databricks&logoColor=white" alt="Databricks">
   <img src="https://img.shields.io/badge/PySpark-E25A1C?style=for-the-badge&logo=Apache%20Spark&logoColor=white" alt="PySpark">
   <img src="https://img.shields.io/badge/Delta%20Lake-00A9E0?style=for-the-badge&logo=Delta%20Lake&logoColor=white" alt="Delta Lake">
-  <img src="https://img.shields.io/badge/Data%20Engineering-4B0082?style=for-the-badge&logo=Databricks&logoColor=white" alt="Data Engineering">
+  <img src="https://img.shields.io/badge/Azure%20SQL-00BCF2?style=for-the-badge&logo=Microsoft%20Azure&logoColor=white" alt="Azure SQL">
 </p>
 
 ## 📖 About the Project
 
-The **Novacart Data Pipeline** is an end-to-end data engineering solution designed to process, clean, and analyze high-velocity e-commerce data. Built on **Azure Databricks**, this project utilizes **PySpark** and **Delta Lake** to ingest raw data (Orders, Products, Payments) and transform it into high-quality, actionable insights using the **Medallion Architecture**.
+The **Novacart Data Pipeline** is an enterprise-grade data engineering solution built to process, clean, and analyze high-velocity e-commerce data. It ingests transactional data directly from an **Azure SQL Database** using **Databricks Lakehouse Federation**, allowing for seamless and secure data access without moving the underlying data until necessary. 
+
+The core processing engine is built on **Azure Databricks** leveraging **PySpark** and **Delta Lake**. The pipeline rigorously follows the **Medallion Architecture**, progressing data through Bronze, Silver, and Gold layers to ultimately feed **BI Dashboards** and trigger automated **Alerts** based on business metrics. The entire project is integrated with **GitHub** via Databricks Repos for CI/CD and version control, with metadata and governance managed by **Unity Catalog**.
 
 This project showcases production-ready data engineering concepts including:
-- **Lakehouse Federation**: Seamlessly querying and analyzing data across scalable data lakes.
-- **Incremental Processing**: Custom watermarking to process only new and changed data, ensuring optimal compute efficiency.
-- **Data Quality Control**: Built-in quarantine pipelines to separate corrupted or invalid records without disrupting the main data flow.
-- **Slowly Changing Dimensions (SCD Type 2)**: Historical tracking of order and product states, ensuring no loss of historical state for business analytics.
+- **Lakehouse Federation**: Querying external SQL databases directly from Databricks.
+- **Medallion Architecture**: Structuring data pipelines into raw, cleansed, and curated layers.
+- **Incremental Data Loading**: Efficiently loading only new and changed records to save compute costs.
+- **Slowly Changing Dimensions (SCD Type 2)**: Historical tracking of business entity changes over time.
+- **Data Quality Control**: Built-in pipelines to quarantine bad records before they pollute downstream analytics.
+- **Workflow Automation & Alerting**: Databricks Jobs scheduling notebooks, refreshing dashboards, and triggering notifications.
 
 ## 🏗️ Architecture
 
-The data pipeline rigorously follows the Medallion Architecture pattern:
-
 ```mermaid
 graph TD
-    subgraph Data Sources
-        O[Orders Data]
-        P[Products Data]
-        Pay[Payments Data]
+    subgraph External Systems
+        SQL[(Azure SQL Database)]
+        GH[GitHub]
     end
 
-    subgraph Bronze Layer [Bronze Layer - Raw Ingestion]
-        B_O[(orders_raw)]
-        B_P[(products_raw)]
-        B_Pay[(payments_raw)]
-    end
-
-    subgraph Silver Layer [Silver Layer - Cleansed & Conformed]
-        S_O[(orders_transformed)]
-        S_P[(products_transformed)]
-        S_Pay[(payments_transformed)]
-        Q[(Quarantine Tables)]
-    end
-
-    subgraph Gold Layer [Gold Layer - Business Aggregation]
-        G_O[(orders_information)]
-        G_O_SCD[(orders_information_scd2)]
-        G_Cat[(category_performance)]
-    end
-
-    O --> B_O
-    P --> B_P
-    Pay --> B_Pay
-
-    B_O -- Cleanse & Standardize --> S_O
-    B_O -. Invalid Data .-> Q
-    B_P -- Cleanse & Standardize --> S_P
-    B_P -. Invalid Data .-> Q
-    B_Pay -- Cleanse & Standardize --> S_Pay
-    B_Pay -. Invalid Data .-> Q
-
-    S_O --> G_O
-    S_P --> G_O
-    S_Pay --> G_O
+    SQL -- "1. Customer Orders\n2. Product Details\n3. Payment Transactions" --> LF
     
-    G_O -- Historical Tracking --> G_O_SCD
-    G_O -- Aggregation --> G_Cat
+    subgraph Azure Databricks Environment
+        LF([Databricks Lakehouse Federation])
+        
+        subgraph Databricks Repos [Databricks Repos via GitHub]
+            subgraph Unity Catalog & Delta Lake
+                B[Bronze Layer<br><i>Incremental Data Loading</i>]
+                S[Silver Layer<br><i>Data Cleaning & Transformations</i>]
+                G[Gold Layer<br><i>Data Joining, Data Enrichment, History Tracking - SCD2, Business Aggregations</i>]
+            end
+        end
+
+        subgraph Consumption
+            BI[BI Dashboards]
+        end
+
+        subgraph Jobs | Workflows
+            W_N[Notebook Files]
+            W_D[BI Dashboard Refresh]
+            W_A[Alert Execution]
+        end
+
+        Alert((Alert to Trigger Notification))
+    end
+
+    LF --> B
+    B --> S
+    S --> G
+    
+    GH <-. CI/CD Version Control .-> Databricks Repos
+
+    G --> BI
+    G -. Orchestrated by .-> W_N
+    
+    W_N --> W_D
+    W_D --> W_A
+    
+    BI --> Alert
+    W_A --> Alert
 ```
 
+## ⚙️ Data Pipeline Stages
+
 ### 🥉 Bronze Layer
-- **Purpose**: Act as a raw landing zone for ingested data.
-- **Process**: Appends unmodified raw records for `orders`, `products`, and `payments` to Delta tables, attaching metadata (`bronze_ingested_at`, `bronze_run_id`) to track pipeline ingestion batches.
+- **Incremental Data Loading**: Acts as the raw landing zone. Data is pulled via Lakehouse Federation from Azure SQL into Delta Lake. Metadata is attached (e.g., ingestion timestamps and run IDs) to track incremental batches.
 
 ### 🥈 Silver Layer
-- **Purpose**: Cleanse, validate, and conform the raw data.
-- **Process**: 
+- **Data Cleaning & Transformations**: Cleanses and standardizes the raw data. 
   - Standardizes timestamps, casts strings to numeric types, and formats text.
-  - Implements data quality rules (e.g., ensuring `order_amount` > 0).
-  - Routes clean data to `_transformed` tables and sends invalid data to `_quarantine` tables for manual review, ensuring bad data does not halt the pipeline.
+  - Implements data quality rules, quarantining invalid records (like negative payment amounts) for manual review so the main pipeline never breaks.
 
 ### 🥇 Gold Layer
-- **Purpose**: Serve business-level aggregations and dimensional modeling for analytics.
-- **Process**:
-  - Denormalizes data into a cohesive `orders_information` table.
-  - Implements **SCD Type 2** via `orders_information_scd2` to track historical changes over time.
-  - Aggregates metrics into `category_performance` to track Gross Merchandise Value (GMV), payment completion ratios, and payment failure rates across product categories.
+- **Business Aggregations & History Tracking**: The curated layer for analytics.
+  - Denormalizes data into a cohesive analytical model.
+  - Implements **SCD Type 2** to track historical changes (e.g., product price changes or order status updates).
+  - Aggregates metrics to track Gross Merchandise Value (GMV), payment completion ratios, and payment failure rates across product categories.
+
+## 📊 Orchestration & Visualization
+- **Jobs & Workflows**: Databricks Jobs automate the sequential execution of the Bronze, Silver, and Gold notebooks.
+- **BI Dashboards**: The final Gold tables power business intelligence dashboards for stakeholders.
+- **Alerts**: Automated alerts are configured to trigger notifications (e.g., via email or Slack) when specific data thresholds are met or if pipeline failures occur.
 
 ## 🛠️ Technology Stack
 
-- **Compute & Orchestration**: Azure Databricks, Apache Spark
+- **Data Sources**: Azure SQL Database
+- **Compute & Orchestration**: Azure Databricks, Databricks Workflows, Jobs
+- **Governance & Storage**: Unity Catalog, Delta Lake, Parquet
 - **Languages**: Python (PySpark), SQL
-- **Storage**: Delta Lake, Parquet
-- **Architecture**: Medallion Data Lakehouse
-
-## 🚀 How to Run
-
-The repository contains three primary notebooks which should be executed sequentially:
-
-1. `bronze/bronze_work.ipynb`: Ingests initial raw mock data into the Bronze Delta tables.
-2. `silver/silver_work.ipynb`: Processes incremental batches from Bronze, cleanses the data, and populates the Silver tables.
-3. `gold/gold_work.ipynb`: Joins Silver tables to create the denormalized Gold tables, performs SCD Type 2 merges, and calculates category performance metrics.
+- **CI/CD & Version Control**: GitHub, Databricks Repos
+- **Consumption**: Databricks SQL Dashboards, Alerts
 
 ## 📬 Contact / Let's Connect
 
