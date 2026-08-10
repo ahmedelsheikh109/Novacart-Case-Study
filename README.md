@@ -24,7 +24,7 @@ This project showcases production-ready data engineering concepts including:
 ## 🏗️ Architecture
 
 ```mermaid
-graph TD
+graph LR
     subgraph External_Systems [External Systems]
         SQL[(Azure SQL Database)]
         GH[GitHub]
