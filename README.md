@@ -30,16 +30,16 @@ graph TD
         GH[GitHub]
     end
 
-    SQL -- "1. Customer Orders<br>2. Product Details<br>3. Payment Transactions" --> LF
+    SQL -->|"1. Customer Orders<br>2. Product Details<br>3. Payment Transactions"| LF
     
     subgraph Azure_Databricks [Azure Databricks Environment]
         LF([Databricks Lakehouse Federation])
         
         subgraph Databricks_Repos [Databricks Repos via GitHub]
             subgraph Unity_Catalog [Unity Catalog & Delta Lake]
-                B[Bronze Layer<br><i>Incremental Data Loading</i>]
-                S[Silver Layer<br><i>Data Cleaning & Transformations</i>]
-                G[Gold Layer<br><i>Data Joining, Data Enrichment, History Tracking - SCD2, Business Aggregations</i>]
+                B["Bronze Layer<br>Incremental Data Loading"]
+                S["Silver Layer<br>Data Cleaning & Transformations"]
+                G["Gold Layer<br>Data Joining, Data Enrichment, History Tracking - SCD2, Business Aggregations"]
             end
         end
 
@@ -60,10 +60,10 @@ graph TD
     B --> S
     S --> G
     
-    GH -. CI/CD Version Control .-> Databricks_Repos
+    GH -.->|"CI/CD Version Control"| Databricks_Repos
 
     G --> BI
-    G -. Orchestrated by .-> W_N
+    G -.->|"Orchestrated by"| W_N
     
     W_N --> W_D
     W_D --> W_A
