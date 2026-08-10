@@ -1,11 +1,5 @@
 # 🛒 Novacart E-Commerce Data Pipeline
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Azure%20Databricks-F3702A?style=for-the-badge&logo=Databricks&logoColor=white" alt="Databricks">
-  <img src="https://img.shields.io/badge/PySpark-E25A1C?style=for-the-badge&logo=Apache%20Spark&logoColor=white" alt="PySpark">
-  <img src="https://img.shields.io/badge/Delta%20Lake-00A9E0?style=for-the-badge&logo=Delta%20Lake&logoColor=white" alt="Delta Lake">
-  <img src="https://img.shields.io/badge/Azure%20SQL-00BCF2?style=for-the-badge&logo=Microsoft%20Azure&logoColor=white" alt="Azure SQL">
-</p>
 
 ## 📖 About the Project
 
