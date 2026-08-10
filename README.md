@@ -9,9 +9,33 @@
 
 ## 🏗️ Architecture
 
-<p align="center">
-  <img src="./assets/architecture.png" alt="Architecture Diagram">
-</p>
+```mermaid
+graph LR
+    %% Define styles for obvious colors
+    classDef bronze fill:#cd7f32,stroke:#333,stroke-width:2px,color:#fff;
+    classDef silver fill:#c0c0c0,stroke:#333,stroke-width:2px,color:#000;
+    classDef gold fill:#ffd700,stroke:#333,stroke-width:2px,color:#000;
+    classDef sql fill:#00bfff,stroke:#333,stroke-width:2px,color:#fff;
+    classDef databricks fill:#ff3621,stroke:#333,stroke-width:2px,color:#fff;
+
+    SQL[(Azure SQL Database)]:::sql -->|Lakehouse Federation| B
+    
+    subgraph Medallion Architecture [Databricks Unity Catalog and Delta Lake]
+        direction LR
+        B[(Bronze Layer)]:::bronze -->|Cleanse and Standardize| S[(Silver Layer)]:::silver
+        S -->|Aggregate and SCD Type 2| G[(Gold Layer)]:::gold
+    end
+    
+    subgraph Orchestration and Consumption
+        G --> BI[BI Dashboards]
+        BI --> AL((Trigger Alerts))
+        
+        GH[GitHub Repos] -.->|CI/CD Sync| W[Databricks Workflows / Jobs]:::databricks
+        W -.->|Automates| B
+        W -.->|Automates| S
+        W -.->|Automates| G
+    end
+```
 
 ---
 
